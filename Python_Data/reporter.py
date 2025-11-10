@@ -32,35 +32,35 @@ def left_up(e):
 
 class Idle:
 
-    def __init__(self, boy):
-        self.boy = boy
+    def __init__(self, reporter):
+        self.reporter = reporter
 
     def enter(self, e):
-        self.boy.wait_time = get_time()
-        self.boy.dir = 0
+        self.reporter.wait_time = get_time()
+        self.reporter.dir = 0
 
 
     def exit(self, e):
         if space_down(e):
-            self.boy.fire_ball()
+            self.reporter.fire_ball()
 
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % 8
-        if get_time() - self.boy.wait_time > 3:
-            self.boy.state_machine.handle_state_event(('TIMEOUT', None))
+        self.reporter.frame = (self.reporter.frame + 1) % 8
+        if get_time() - self.reporter.wait_time > 3:
+            self.reporter.state_machine.handle_state_event(('TIMEOUT', None))
 
     def draw(self):
-        if self.boy.face_dir == 1: # right
-            self.boy.image.clip_draw(self.boy.frame * 100, 300, 100, 100, self.boy.x, self.boy.y)
+        if self.reporter.face_dir == 1: # right
+            self.reporter.image.clip_draw(self.reporter.frame * 100, 300, 100, 100, self.reporter.x, self.reporter.y)
         else: # face_dir == -1: # left
-            self.boy.image.clip_draw(self.boy.frame * 100, 200, 100, 100, self.boy.x, self.boy.y)
+            self.reporter.image.clip_draw(self.reporter.frame * 100, 200, 100, 100, self.reporter.x, self.reporter.y)
 
 
 class Sleep:
 
-    def __init__(self, boy):
-        self.boy = boy
+    def __init__(self, reporter):
+        self.reporter = reporter
 
     def enter(self, e):
         pass
@@ -69,43 +69,43 @@ class Sleep:
         pass
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % 8
+        self.reporter.frame = (self.reporter.frame + 1) % 8
 
 
     def handle_event(self, event):
         pass
 
     def draw(self):
-        if self.boy.face_dir == 1:
-            self.boy.image.clip_composite_draw(self.boy.frame * 100, 300, 100, 100, 3.141592/2, '', self.boy.x - 25, self.boy.y - 25, 100, 100)
+        if self.reporter.face_dir == 1:
+            self.reporter.image.clip_composite_draw(self.reporter.frame * 100, 300, 100, 100, 3.141592/2, '', self.reporter.x - 25, self.reporter.y - 25, 100, 100)
         else:
-            self.boy.image.clip_composite_draw(self.boy.frame * 100, 200, 100, 100, -3.141592/2, '', self.boy.x + 25, self.boy.y - 25, 100, 100)
+            self.reporter.image.clip_composite_draw(self.reporter.frame * 100, 200, 100, 100, -3.141592/2, '', self.reporter.x + 25, self.reporter.y - 25, 100, 100)
 
 
 
 class Run:
-    def __init__(self, boy):
-        self.boy = boy
+    def __init__(self, reporter):
+        self.reporter = reporter
 
     def enter(self, e):
         if right_down(e) or left_up(e):
-            self.boy.dir = self.boy.face_dir = 1
+            self.reporter.dir = self.reporter.face_dir = 1
         elif left_down(e) or right_up(e):
-            self.boy.dir = self.boy.face_dir = -1
+            self.reporter.dir = self.reporter.face_dir = -1
 
     def exit(self, e):
         if space_down(e):
-            self.boy.fire_ball()
+            self.reporter.fire_ball()
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % 8
-        self.boy.x += self.boy.dir * 5
+        self.reporter.frame = (self.reporter.frame + 1) % 8
+        self.reporter.x += self.reporter.dir * 5
 
     def draw(self):
-        if self.boy.face_dir == 1: # right
-            self.boy.image.clip_draw(self.boy.frame * 100, 100, 100, 100, self.boy.x, self.boy.y)
+        if self.reporter.face_dir == 1: # right
+            self.reporter.image.clip_draw(self.reporter.frame * 100, 100, 100, 100, self.reporter.x, self.reporter.y)
         else: # face_dir == -1: # left
-            self.boy.image.clip_draw(self.boy.frame * 100, 0, 100, 100, self.boy.x, self.boy.y)
+            self.reporter.image.clip_draw(self.reporter.frame * 100, 0, 100, 100, self.reporter.x, self.reporter.y)
 
 
 
