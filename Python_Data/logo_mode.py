@@ -35,7 +35,13 @@ def update():
 
 def draw():
     clear_canvas()
-    image.draw(400,300)
+
+    w = get_canvas_width()
+    h = get_canvas_height()
+
+    # 이미지를 캔버스 중앙에, 캔버스 크기(w, h)로 꽉 채워서 그립니다.
+    image.draw(w // 2, h // 2, w, h)
+
     update_canvas()
 
 

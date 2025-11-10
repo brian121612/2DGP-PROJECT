@@ -6,7 +6,21 @@ from reporter import Reporter
 # from building_inside import Grass
 import game_world
 
-boy = None
+class Background:
+    def __init__(self):
+        # 사용자가 제공한 'Building_Outside.png' 이미지를 로드합니다.
+        self.image = load_image('Building_Inside_F1.png')
+        self.canvas_width, self.canvas_height = 1536, 864
+
+    def draw(self):
+        # 캔버스 중앙에 배경 이미지를 그립니다.
+        self.image.draw(self.canvas_width // 2, self.canvas_height // 2)
+
+    def update(self):
+        # 배경은 움직이지 않으므로 update는 비워둡니다.
+        pass
+
+reporter = None
 
 def pause():
     pass
@@ -30,8 +44,8 @@ def handle_events():
 def init():
     global reporter
 
-    #grass = Grass()
-    #game_world.add_object(grass, 0)
+    background = Background()
+    game_world.add_object(background, 0)
 
     reporter = Reporter()
     game_world.add_object(reporter, 1)

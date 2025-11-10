@@ -1,5 +1,5 @@
 from pico2d import load_image, get_time
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT
+from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN
 
 import game_world
 from state_machine import StateMachine
@@ -109,51 +109,75 @@ class Run:
 
 
 
-
-
-
-
 class Reporter:
     def __init__(self):
-
-        self.item = None
-
-        self.x, self.y = 400, 90
-        self.frame = 0
-        self.face_dir = 1
-        self.dir = 0
         self.image = load_image('Player_Sheet.png')
+        # 배경색이 하얀색이면 투명 처리
+        # self.image.set_colorkey(255, 255, 255)
 
-        self.IDLE = Idle(self)
-        self.SLEEP = Sleep(self)
-        self.RUN = Run(self)
-        self.state_machine = StateMachine(
-            self.IDLE,
-            {
-                self.SLEEP : {space_down: self.IDLE},
-                self.IDLE : {space_down: self.IDLE, time_out: self.SLEEP, right_down: self.RUN, left_down: self.RUN, right_up: self.RUN, left_up: self.RUN},
-                self.RUN : {space_down: self.RUN, right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE}
-            }
-        )
+        self.frame_width = self.image.w / 8
+        self.frame_height = self.image.h / 4
 
-    def update(self):
-        self.state_machine.update()
+        self.x, self.y = 1536 // 2, 864 // 2
+        self.frame = 0
+        self.action = 0
+        self.x_dir = 0
+        self.y_dir = 0
+        self.speed = 5
+        self.frame_timer = 0.0
+        self.last_time = get_time()
+        self.frames_per_second = 10.0
+        self.time_per_frame = 1.0 / self.frames_per_second
 
     def handle_event(self, event):
-        self.state_machine.handle_state_event(('INPUT', event))
-        pass
+        if event.type == SDL_KEYDOWN:
+            if event.key == SDLK_LEFT:
+                self.x_dir = -1
+                self.action = 1
+            elif event.key == SDLK_RIGHT:
+                self.x_dir = 1
+                self.action = 2
+            elif event.key == SDLK_UP:
+                self.y_dir = 1
+                self.action = 3
+            elif event.key == SDLK_DOWN:
+                self.y_dir = -1
+                self.action = 0
+        elif event.type == SDL_KEYUP:
+            if event.key == SDLK_LEFT and self.x_dir == -1:
+                self.x_dir = 0
+            elif event.key == SDLK_RIGHT and self.x_dir == 1:
+                self.x_dir = 0
+            elif event.key == SDLK_UP and self.y_dir == 1:
+                self.y_dir = 0
+            elif event.key == SDLK_DOWN and self.y_dir == -1:
+                self.y_dir = 0
+
+    def update(self):
+        self.x += self.x_dir * self.speed
+        self.y += self.y_dir * self.speed
+
+        if self.x_dir != 0 or self.y_dir != 0:
+            current_time = get_time()
+            time_elapsed = current_time - self.last_time
+            self.frame_timer += time_elapsed
+
+            if self.frame_timer >= self.time_per_frame:
+                self.frame = (self.frame + 1) % 8
+                self.frame_timer -= self.time_per_frame
+
+            self.last_time = current_time
+        else:
+            self.frame = 0
+            self.last_time = get_time()
 
     def draw(self):
-        self.state_machine.draw()
+        self.image.clip_draw(
+            int(self.frame * self.frame_width),
+            int(self.action * self.frame_height),
+            int(self.frame_width),
+            int(self.frame_height),
+            self.x,
+            self.y
+        )
 
-'''
-    def fire_ball(self):
-        if self.item == 'Ball':
-            ball = Ball(self.x, self.y, self.face_dir*10)
-            game_world.add_object(ball, 1)
-        elif self.item == 'BigBall':
-            ball = BigBall(self.x, self.y, self.face_dir*10)
-            game_world.add_object(ball, 1)
-        else:
-            print('볼이 없습니다.')
-'''
