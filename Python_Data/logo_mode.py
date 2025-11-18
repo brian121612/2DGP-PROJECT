@@ -29,7 +29,7 @@ def update():
     # logo 모드가 2초 동안 지속되도록 한다.
     global logo_start_time
 
-    if get_time() - logo_start_time > 3.0:
+    if get_time() - logo_start_time > 1.0:
         game_framework.change_mode(title_mode)
 
 

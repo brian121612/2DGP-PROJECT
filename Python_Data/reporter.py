@@ -1,4 +1,4 @@
-from pico2d import load_image, get_time
+from pico2d import *
 from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN
 
 import game_world
@@ -52,34 +52,9 @@ class Idle:
 
     def draw(self):
         if self.reporter.face_dir == 1: # right
-            self.reporter.image.clip_draw(self.reporter.frame * 100, 300, 100, 100, self.reporter.x, self.reporter.y)
+            self.reporter.image.clip_draw(self.reporter.frame * 50, 100, 100, 100, self.reporter.x, self.reporter.y)
         else: # face_dir == -1: # left
-            self.reporter.image.clip_draw(self.reporter.frame * 100, 200, 100, 100, self.reporter.x, self.reporter.y)
-
-
-class Sleep:
-
-    def __init__(self, reporter):
-        self.reporter = reporter
-
-    def enter(self, e):
-        pass
-
-    def exit(self, e):
-        pass
-
-    def do(self):
-        self.reporter.frame = (self.reporter.frame + 1) % 8
-
-
-    def handle_event(self, event):
-        pass
-
-    def draw(self):
-        if self.reporter.face_dir == 1:
-            self.reporter.image.clip_composite_draw(self.reporter.frame * 100, 300, 100, 100, 3.141592/2, '', self.reporter.x - 25, self.reporter.y - 25, 100, 100)
-        else:
-            self.reporter.image.clip_composite_draw(self.reporter.frame * 100, 200, 100, 100, -3.141592/2, '', self.reporter.x + 25, self.reporter.y - 25, 100, 100)
+            self.reporter.image.clip_draw(self.reporter.frame * 50, 200, 100, 100, self.reporter.x, self.reporter.y)
 
 
 
@@ -103,17 +78,15 @@ class Run:
 
     def draw(self):
         if self.reporter.face_dir == 1: # right
-            self.reporter.image.clip_draw(self.reporter.frame * 100, 100, 100, 100, self.reporter.x, self.reporter.y)
+            self.reporter.image.clip_draw(self.reporter.frame * 50, 100, 100, 100, self.reporter.x, self.reporter.y)
         else: # face_dir == -1: # left
-            self.reporter.image.clip_draw(self.reporter.frame * 100, 0, 100, 100, self.reporter.x, self.reporter.y)
+            self.reporter.image.clip_draw(self.reporter.frame * 50, 0, 100, 100, self.reporter.x, self.reporter.y)
 
 
 
 class Reporter:
     def __init__(self):
-        self.image = load_image('Player_Sheet.png')
-        # 배경색이 하얀색이면 투명 처리
-        # self.image.set_colorkey(255, 255, 255)
+        self.image = load_image('Player_Sheet_Fixed.png')
 
         self.frame_width = self.image.w / 8
         self.frame_height = self.image.h / 4
