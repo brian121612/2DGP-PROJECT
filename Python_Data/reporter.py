@@ -86,7 +86,7 @@ class Run:
 
 class Reporter:
     def __init__(self):
-        self.image = load_image('Player_Sheet_Fixed.png')
+        self.image = load_image('Player_Sheet_Fixed_2.png')
 
         self.frame_width = self.image.w / 8
         self.frame_height = self.image.h / 4
