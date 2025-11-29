@@ -9,8 +9,8 @@ import game_world
 class Background:
     def __init__(self):
         # 사용자가 제공한 'Building_Outside.png' 이미지를 로드합니다.
-        self.image = load_image('Building_Inside_F1.png')
-        self.canvas_width, self.canvas_height = 1536, 864
+        self.image = load_image('FLOOR_1.png')
+        self.canvas_width, self.canvas_height = 1280, 720
 
     def draw(self):
         # 캔버스 중앙에 배경 이미지를 그립니다.

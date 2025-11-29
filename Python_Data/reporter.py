@@ -2,6 +2,7 @@ from pico2d import *
 from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN
 
 import game_world
+import game_framework
 from state_machine import StateMachine
 
 
@@ -26,7 +27,17 @@ def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
 
 
+# Reporter Run Speed
+PIXEL_PER_METER = (100.0 / 0.3)  # 10 pixel 30 cm
+RUN_SPEED_KMPH = 20.0  # Km / Hour
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
+# Reporter Action Speed
+TIME_PER_ACTION = 0.1
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+FRAMES_PER_ACTION = 8
 
 
 
@@ -46,7 +57,7 @@ class Idle:
 
 
     def do(self):
-        self.reporter.frame = (self.reporter.frame + 1) % 8
+        self.reporter.frame = (self.reporter.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         if get_time() - self.reporter.wait_time > 3:
             self.reporter.state_machine.handle_state_event(('TIMEOUT', None))
 
@@ -73,20 +84,22 @@ class Run:
             self.reporter.fire_ball()
 
     def do(self):
-        self.reporter.frame = (self.reporter.frame + 1) % 8
-        self.reporter.x += self.reporter.dir * 5
+        self.reporter.frame = (self.reporter.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
+        self.reporter.x += self.reporter.xdir * RUN_SPEED_PPS * game_framework.frame_time
+        self.reporter.y += self.reporter.ydir * RUN_SPEED_PPS * game_framework.frame_time
 
     def draw(self):
         if self.reporter.face_dir == 1: # right
             self.reporter.image.clip_draw(self.reporter.frame * 50, 100, 100, 100, self.reporter.x, self.reporter.y)
         else: # face_dir == -1: # left
-            self.reporter.image.clip_draw(self.reporter.frame * 50, 0, 100, 100, self.reporter.x, self.reporter.y)
+            self.reporter.image.clip_composite_draw(self.reporter.frame * 50, 0, 100, 100, self.reporter.x, self.reporter.y)
 
 
 
 class Reporter:
     def __init__(self):
         self.image = load_image('Player_Sheet_Fixed_2.png')
+        self.image2 = load_image('Dark_Finish_3.png')
 
         self.frame_width = self.image.w / 8
         self.frame_height = self.image.h / 4
@@ -96,7 +109,7 @@ class Reporter:
         self.action = 0
         self.x_dir = 0
         self.y_dir = 0
-        self.speed = 5
+        self.speed = 2
         self.frame_timer = 0.0
         self.last_time = get_time()
         self.frames_per_second = 10.0
@@ -153,4 +166,5 @@ class Reporter:
             self.x,
             self.y
         )
+        self.image2.draw(self.x - 25, self.y - 40)
 
