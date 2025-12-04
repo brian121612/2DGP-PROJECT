@@ -50,7 +50,7 @@ def init():
     reporter = Reporter()
     game_world.add_object(reporter, 1)
 
-    item
+
 
 
 def update():

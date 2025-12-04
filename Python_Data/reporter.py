@@ -104,7 +104,7 @@ class Reporter:
         self.frame_width = self.image.w / 8
         self.frame_height = self.image.h / 4
 
-        self.x, self.y = 1536 // 2, 864 // 2
+        self.x, self.y = 1280 // 2, 50
         self.frame = 0
         self.action = 0
         self.x_dir = 0
