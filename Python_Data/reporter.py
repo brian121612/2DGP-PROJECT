@@ -12,33 +12,6 @@ def space_down(e): # e is space down ?
 def e_down(e): # e is space down ?
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_e
 
-'''
-time_out = lambda e: e[0] == 'TIMEOUT'
-
-def right_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
-def right_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
-
-
-def left_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LEFT
-def left_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
-
-
-def down_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_DOWN
-def down_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_DOWN
-
-
-def up_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_UP
-def up_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_UP
-'''
-
 def event_stop(e):
     return e[0] == 'STOP'
 
@@ -80,7 +53,6 @@ class Idle:
         self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 300, 50, 100, self.reporter.x, self.reporter.y)
 
 
-
 class Run:
     def __init__(self, reporter):
         self.reporter = reporter
@@ -100,18 +72,14 @@ class Run:
 
     def draw(self):
         if self.reporter.x_dir == 0:
-            if self.reporter.face_dir == 1:
-                self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 100, 50, 100, self.reporter.x, self.reporter.y)
-            elif self.reporter.face_dir == -1:
-                self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 0, 50, 100, self.reporter.x,self.reporter.y)
+            if self.reporter.y_dir == 1:
+                self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 200, 50, 100, self.reporter.x, self.reporter.y)
             else:
-                self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 300, 50, 100, self.reporter.x,self.reporter.y)
+                self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 300, 50, 100, self.reporter.x, self.reporter.y)
         elif self.reporter.x_dir == 1:
             self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 100, 50, 100, self.reporter.x, self.reporter.y)
         elif self.reporter.x_dir == -1:
             self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 0, 50, 100, self.reporter.x,self.reporter.y)
-
-
 
 
 class Reporter:
