@@ -15,7 +15,7 @@ def resume():
 
 def init():
     global image
-    image = load_image('Building_Outside_2.png')
+    image = load_image('Building_Outside.png')
 
 
 def finish():
