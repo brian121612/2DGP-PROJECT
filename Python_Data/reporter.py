@@ -149,11 +149,26 @@ class Reporter:
         if self.y <= 50: self.y = 50
         if self.y >= 645: self.y = 645
 
+        # 계단 충돌 처리
+
+
 
 
     def handle_event(self, event):
+        # FlashLight Toggle ON/OFF
         if event.type == SDL_KEYDOWN and event.key == SDLK_e:
             self.flashlight ^= 1
+            return
+
+        if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
+            if play_mode.background.floor == 1:
+                play_mode.background.floor = 2
+                play_mode.background.load_image()
+                self.x, self.y = play_mode.background.start_pos_floor_2
+            elif play_mode.background.floor == 2:
+                play_mode.background.floor = 1
+                play_mode.background.load_image()
+                self.x, self.y = play_mode.background.start_pos_floor_1
             return
 
         if event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN):
@@ -209,6 +224,14 @@ class Reporter:
                            play_mode.background.floor_2_x2,
                            play_mode.background.floor_2_y2)
 
+        if play_mode.background.floor == 1:
+            if (play_mode.background.floor_1_x1 <= self.x <= play_mode.background.floor_1_x2 and
+                play_mode.background.floor_1_y1 <= self.y <= play_mode.background.floor_1_y2):
+                    self.font.draw(600, 705, 'Press SPACE to go UP', (255, 255, 0))
+        if play_mode.background.floor == 2:
+            if (play_mode.background.floor_2_x1 <= self.x <= play_mode.background.floor_2_x2 and
+                    play_mode.background.floor_2_y1 <= self.y <= play_mode.background.floor_2_y2):
+                self.font.draw(420, 705, 'Press SPACE to go DOWN', (255, 255, 0))
 
         '''
         if self.flashlight == 1:

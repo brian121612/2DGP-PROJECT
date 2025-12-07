@@ -22,10 +22,10 @@ class Background:
         self.floor_2_x2 = 610
         self.floor_2_y2 = 695
 
-        if self.floor == 1:
-            self.image = load_image('FLOOR_1_1.png')
-        elif self.floor == 2:
-            self.image = load_image('FLOOR_2_1.png')
+        self.load_image()
+
+        self.start_pos_floor_1 = (640, 100)
+        self.start_pos_floor_2 = (540, 540)
 
         self.canvas_width, self.canvas_height = 1280, 720
 
@@ -43,9 +43,17 @@ class Background:
             (560, 0, 720, 310)
         ]
 
+    def load_image(self):
+        if self.floor == 1:
+            self.image = load_image('FLOOR_1.png')
+        elif self.floor == 2:
+            self.image = load_image('FLOOR_2.png')
+
     def draw(self):
         # 캔버스 중앙에 배경 이미지를 그립니다.
         self.image.draw(self.canvas_width // 2, self.canvas_height // 2)
+
+
 
     def update(self):
         # 배경은 움직이지 않으므로 update는 비워둡니다.
@@ -80,6 +88,7 @@ def init():
     game_world.add_object(background, 0)
 
     reporter = Reporter()
+    reporter.x, reporter.y = background.start_pos_floor_1
     game_world.add_object(reporter, 1)
 
 
