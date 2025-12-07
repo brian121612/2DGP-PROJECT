@@ -119,51 +119,56 @@ class Reporter:
 
 
     def handle_collision(self):
-        '''
-        # Left Hallway
-        if self.x <= 485:
-            if self.y >= 470:self.y = 470
-            if self.x <= 20: self.x = 20
-        if self.x <= 535:
-            if self.y <= 330:self.y = 330
-            if self.x <= 20: self.x = 20
+        # 이동 가능 영역 규칙 (FLOOR 1 기준)
+        allowed = False
 
-        # Up Hallway
-        if self.y >= 470:
-            if self.y >= 645: self.y = 645
-            if self.x <= 485: self.x = 485
-            if self.x >= 745: self.x = 745
-        # Right Hallway
-        if self.x >= 745:
-            if self.y >= 470: self.y = 470
-            if self.x >= 1210: self.x = 1210
-        if self.x >= 695:
-            if self.y <= 330: self.y = 330
-            if self.x >= 1210: self.x = 1210
+        if play_mode.background.floor == 1:
+            # 상단 복도
+            if 470 <= self.y <= 525 and 485 <= self.x <= 745:
+                allowed = True
+            # 상단 좌측 복도
+            if 525 <= self.y <= 645 and 485 <= self.x <= 600:
+                allowed = True
+            # 계단
+            if 525 <= self.y <= 645 and 655 <= self.x <= 745:
+                allowed = True
+            # 좌측 복도
+            elif 330 <= self.y <= 470 and 20 <= self.x <= 485:
+                allowed = True
+            # 우측 복도
+            elif 330 <= self.y <= 470 and 745 <= self.x <= 1210:
+                allowed = True
+            # 하단 복도
+            elif 50 <= self.y <= 330 and 535 <= self.x <= 695:
+                allowed = True
+            # 중앙 복도
+            elif 330 <= self.y <= 470 and 485 <= self.x <= 745:
+                allowed = True
+        elif play_mode.background.floor == 2:
+            # 상단 복도
+            if 470 <= self.y <= 500 and 490 <= self.x <= 755:
+                allowed = True
+            # 계단
+            elif 500 <= self.y <= 645 and 490 <= self.x <= 590:
+                allowed = True
+            # 중앙 복도
+            elif 330 <= self.y <= 470 and 20 <= self.x <= 1210:
+                allowed = True
 
-        # Down Hallway
-        if self.y <= 330:
-            if self.y <= 50: self.y = 50
-            if self.x <= 535: self.x = 535
-            if self.x >= 695: self.x = 695
-        '''
-        if self.x <= 20: self.x = 20
-        if self.x >= 1210: self.x = 1210
-        if self.y <= 50: self.y = 50
-        if self.y >= 645: self.y = 645
-
-        # 계단 충돌 처리
+        # 허용영역이 아니라면 → 이전 위치로 복귀
+        if not allowed:
+            self.x, self.y = self.prev_x, self.prev_y
 
     def on_stairs(self):
 
         if play_mode.background.floor == 1:
-            if (play_mode.background.floor_1_x1 <= self.x <= play_mode.background.floor_1_x2 and
-                play_mode.background.floor_1_y1 <= self.y <= play_mode.background.floor_1_y2):
+            if (play_mode.background.stair_1_x1 <= self.x <= play_mode.background.stair_1_x2 and
+                play_mode.background.stair_1_y1 <= self.y <= play_mode.background.stair_1_y2):
                 self.he_is = 1
                 return 1
         elif play_mode.background.floor == 2:
-            if (play_mode.background.floor_2_x1 <= self.x <= play_mode.background.floor_2_x2 and
-                    play_mode.background.floor_2_y1 <= self.y <= play_mode.background.floor_2_y2):
+            if (play_mode.background.stair_2_x1 <= self.x <= play_mode.background.stair_2_x2 and
+                play_mode.background.stair_2_y1 <= self.y <= play_mode.background.stair_2_y2):
                 self.he_is = 1
                 return 1
 
@@ -223,6 +228,7 @@ class Reporter:
         return self.x - 20, self.y - 50, self.x + 20, self.y + 50
 
     def update(self):
+        self.prev_x, self.prev_y = self.x, self.y
         self.state_machine.update()
         import play_mode
         self.handle_collision()
@@ -235,15 +241,15 @@ class Reporter:
         
         # 계단 사각형 테두리 그리기
         if play_mode.background.floor == 1:
-            draw_rectangle(play_mode.background.floor_1_x1,
-                           play_mode.background.floor_1_y1,
-                           play_mode.background.floor_1_x2,
-                           play_mode.background.floor_1_y2)
+            draw_rectangle(play_mode.background.stair_1_x1,
+                           play_mode.background.stair_1_y1,
+                           play_mode.background.stair_1_x2,
+                           play_mode.background.stair_1_y2)
         elif play_mode.background.floor == 2:
-            draw_rectangle(play_mode.background.floor_2_x1,
-                           play_mode.background.floor_2_y1,
-                           play_mode.background.floor_2_x2,
-                           play_mode.background.floor_2_y2)
+            draw_rectangle(play_mode.background.stair_2_x1,
+                           play_mode.background.stair_2_y1,
+                           play_mode.background.stair_2_x2,
+                           play_mode.background.stair_2_y2)
 
         if self.he_is == 1:
             if play_mode.background.floor == 1:
