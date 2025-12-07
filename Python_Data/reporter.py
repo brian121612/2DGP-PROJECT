@@ -101,6 +101,9 @@ class Reporter:
 
         self.flashlight = 0
 
+        # 계단 충돌
+        self.he_is = 0
+
         self.IDLE = Idle(self)
         self.RUN = Run(self)
         self.state_machine = StateMachine(
@@ -151,6 +154,21 @@ class Reporter:
 
         # 계단 충돌 처리
 
+    def on_stairs(self):
+
+        if play_mode.background.floor == 1:
+            if (play_mode.background.floor_1_x1 <= self.x <= play_mode.background.floor_1_x2 and
+                play_mode.background.floor_1_y1 <= self.y <= play_mode.background.floor_1_y2):
+                self.he_is = 1
+                return 1
+        elif play_mode.background.floor == 2:
+            if (play_mode.background.floor_2_x1 <= self.x <= play_mode.background.floor_2_x2 and
+                    play_mode.background.floor_2_y1 <= self.y <= play_mode.background.floor_2_y2):
+                self.he_is = 1
+                return 1
+
+        self.he_is = 0
+        return 0
 
 
 
@@ -159,17 +177,18 @@ class Reporter:
         if event.type == SDL_KEYDOWN and event.key == SDLK_e:
             self.flashlight ^= 1
             return
-
-        if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
-            if play_mode.background.floor == 1:
-                play_mode.background.floor = 2
-                play_mode.background.load_image()
-                self.x, self.y = play_mode.background.start_pos_floor_2
-            elif play_mode.background.floor == 2:
-                play_mode.background.floor = 1
-                play_mode.background.load_image()
-                self.x, self.y = play_mode.background.start_pos_floor_1
-            return
+        # 계단 1층 <-> 2층
+        if self.he_is == 1:
+            if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
+                if play_mode.background.floor == 1:
+                    play_mode.background.floor = 2
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_floor_2
+                elif play_mode.background.floor == 2:
+                    play_mode.background.floor = 1
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_floor_1
+                return
 
         if event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN):
             cur_xdir, cur_ydir = self.x_dir, self.y_dir
@@ -207,12 +226,14 @@ class Reporter:
         self.state_machine.update()
         import play_mode
         self.handle_collision()
+        self.on_stairs()
 
     def draw(self):
         self.state_machine.draw()
         self.font.draw(self.x - 60, self.y + 50, f'({self.x:.1f}, {self.y:.1f})', (255, 255, 0))
         draw_rectangle(*self.get_bb())
-
+        
+        # 계단 사각형 테두리 그리기
         if play_mode.background.floor == 1:
             draw_rectangle(play_mode.background.floor_1_x1,
                            play_mode.background.floor_1_y1,
@@ -224,13 +245,10 @@ class Reporter:
                            play_mode.background.floor_2_x2,
                            play_mode.background.floor_2_y2)
 
-        if play_mode.background.floor == 1:
-            if (play_mode.background.floor_1_x1 <= self.x <= play_mode.background.floor_1_x2 and
-                play_mode.background.floor_1_y1 <= self.y <= play_mode.background.floor_1_y2):
-                    self.font.draw(600, 705, 'Press SPACE to go UP', (255, 255, 0))
-        if play_mode.background.floor == 2:
-            if (play_mode.background.floor_2_x1 <= self.x <= play_mode.background.floor_2_x2 and
-                    play_mode.background.floor_2_y1 <= self.y <= play_mode.background.floor_2_y2):
+        if self.he_is == 1:
+            if play_mode.background.floor == 1:
+                self.font.draw(600, 705, 'Press SPACE to go UP', (255, 255, 0))
+            if play_mode.background.floor == 2:
                 self.font.draw(420, 705, 'Press SPACE to go DOWN', (255, 255, 0))
 
         '''
