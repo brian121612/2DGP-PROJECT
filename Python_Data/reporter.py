@@ -21,7 +21,7 @@ def event_run(e):
 
 # Reporter Run Speed
 PIXEL_PER_METER = (100.0 / 0.3)  # 10 pixel 30 cm
-RUN_SPEED_KMPH = 2.5  # Km / Hour
+RUN_SPEED_KMPH = 5.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
@@ -103,6 +103,10 @@ class Reporter:
 
         # 계단 충돌
         self.he_is = 0
+        # 문 충돌
+        self.enter_door = 0
+        # 정문
+        self.main_door = 0
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
@@ -160,7 +164,6 @@ class Reporter:
             self.x, self.y = self.prev_x, self.prev_y
 
     def on_stairs(self):
-
         if play_mode.background.floor == 1:
             if (play_mode.background.stair_1_x1 <= self.x <= play_mode.background.stair_1_x2 and
                 play_mode.background.stair_1_y1 <= self.y <= play_mode.background.stair_1_y2):
@@ -175,6 +178,46 @@ class Reporter:
         self.he_is = 0
         return 0
 
+    def enter_room(self):
+        self.enter_door = 0
+
+        if play_mode.background.floor == 1:
+            if 450 <= self.y <= 470:
+                if 90 <= self.x <= 185:
+                    self.enter_door = 1
+                    return 1
+                if 265 <= self.x <= 360:
+                    self.enter_door = 2
+                    return 2
+                if 875 <= self.x <= 965:
+                    self.enter_door = 3
+                    return 3
+                if 1045 <= self.x <= 1140:
+                    self.enter_door = 4
+                    return 4
+        elif play_mode.background.floor == 2:
+            if 450 <= self.y <= 470:
+                if 90 <= self.x <= 185:
+                    self.enter_door = 5
+                    return 5
+                if 265 <= self.x <= 360:
+                    self.enter_door = 6
+                    return 6
+                if 885 <= self.x <= 970:
+                    self.enter_door = 7
+                    return 7
+                if 1055 <= self.x <= 1145:
+                    self.enter_door = 8
+                    return 8
+        return 0
+
+    def exit_main_door(self):
+        self.main_door = 0
+
+        if play_mode.background.floor == 1:
+            if 570 <= self.x <= 665 and 20 <= self.y <= 160:
+                self.main_door = 1
+                return 1
 
 
     def handle_event(self, event):
@@ -233,6 +276,8 @@ class Reporter:
         import play_mode
         self.handle_collision()
         self.on_stairs()
+        self.enter_room()
+        self.exit_main_door()
 
     def draw(self):
         self.state_machine.draw()
@@ -253,9 +298,43 @@ class Reporter:
 
         if self.he_is == 1:
             if play_mode.background.floor == 1:
-                self.font.draw(600, 705, 'Press SPACE to go UP', (255, 255, 0))
+                self.font.draw(600, 580, 'Press SPACE to go UP', (255, 255, 0))
             if play_mode.background.floor == 2:
-                self.font.draw(420, 705, 'Press SPACE to go DOWN', (255, 255, 0))
+                self.font.draw(420, 580, 'Press SPACE to go DOWN', (255, 255, 0))
+
+        # 문 enter 테두리
+        if play_mode.background.floor == 1:
+            draw_rectangle(90, 450, 185, 470)
+            draw_rectangle(265, 450, 360, 470)
+            draw_rectangle(875, 450, 965, 470)
+            draw_rectangle(1045, 450, 1140, 470)
+            if self.enter_door == 1:
+                self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
+            elif self.enter_door == 2:
+                self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
+            elif self.enter_door == 3:
+                self.font.draw(840, 500, 'Press f to enter', (255, 255, 0))
+            elif self.enter_door == 4:
+                self.font.draw(1010, 500, 'Press f to enter', (255, 255, 0))
+        elif play_mode.background.floor == 2:
+            draw_rectangle(90, 450, 185, 470)
+            draw_rectangle(265, 450, 360, 470)
+            draw_rectangle(885, 450, 970, 470)
+            draw_rectangle(1055, 450, 1145, 470)
+            if self.enter_door == 5:
+                self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
+            elif self.enter_door == 6:
+                self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
+            elif self.enter_door == 7:
+                self.font.draw(845, 500, 'Press f to enter', (255, 255, 0))
+            elif self.enter_door == 8:
+                self.font.draw(1015, 500, 'Press f to enter', (255, 255, 0))
+
+        # 정문 테두리
+        if play_mode.background.floor == 1:
+            draw_rectangle(570, 20, 665, 160)
+            if self.main_door == 1:
+                self.font.draw(540, 140, 'Press ESC to exit', (0, 255, 0))
 
         '''
         if self.flashlight == 1:
