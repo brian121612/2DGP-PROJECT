@@ -3,14 +3,45 @@ from pico2d import *
 
 import title_mode, item_mode
 from reporter import Reporter
-# from building_inside import Grass
 import game_world
+
+background = None
 
 class Background:
     def __init__(self):
         # 사용자가 제공한 'Building_Outside.png' 이미지를 로드합니다.
-        self.image = load_image('FLOOR_1.png')
+        self.floor = 1
+
+        self.floor_1_x1 = 635
+        self.floor_1_y1 = 515
+        self.floor_1_x2 = 770
+        self.floor_1_y2 = 695
+
+        self.floor_2_x1 = 470
+        self.floor_2_y1 = 485
+        self.floor_2_x2 = 610
+        self.floor_2_y2 = 695
+
+        if self.floor == 1:
+            self.image = load_image('FLOOR_1_1.png')
+        elif self.floor == 2:
+            self.image = load_image('FLOOR_2_1.png')
+
         self.canvas_width, self.canvas_height = 1280, 720
+
+        # (left, bottom, right, top)
+        self.wall_colls = [
+            # 왼쪽 상단 큰 벽
+            (0, 360, 560, 720),
+            # 오른쪽 상단 큰 벽
+            (720, 360, 1280, 720),
+
+            # 중앙 T자 복도 위쪽 벽
+            (560, 360, 720, 570),  # 중앙 복도 상단 ㄷ자 모양의 위쪽 수평 부분
+
+            # 하단 중앙 출입문 양옆 벽
+            (560, 0, 720, 310)
+        ]
 
     def draw(self):
         # 캔버스 중앙에 배경 이미지를 그립니다.
@@ -41,8 +72,9 @@ def handle_events():
         else:
             reporter.handle_event(event)
 
+
 def init():
-    global reporter
+    global reporter, background
 
     background = Background()
     game_world.add_object(background, 0)

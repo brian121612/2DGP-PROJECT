@@ -4,6 +4,7 @@ from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK
 import game_world
 import game_framework
 from state_machine import StateMachine
+import play_mode
 
 
 def space_down(e): # e is space down ?
@@ -88,7 +89,10 @@ class Reporter:
         self.image2 = load_image('FlashLight_ON.png')
         self.image3 = load_image('FlashLight_OFF.png')
 
-        self.x, self.y = 1280 // 2, 50
+        self.font = load_font('ENCR10B.TTF', 16)
+
+        self.start_x, self.start_y = 1280 // 2 - 25, 50
+        self.x, self.y = self.start_x, self.start_y
         self.frame = 0
         self.action = 0
         self.face_dir = 0
@@ -109,6 +113,43 @@ class Reporter:
                             event_stop:self.IDLE}
             }
         )
+
+
+    def handle_collision(self):
+        '''
+        # Left Hallway
+        if self.x <= 485:
+            if self.y >= 470:self.y = 470
+            if self.x <= 20: self.x = 20
+        if self.x <= 535:
+            if self.y <= 330:self.y = 330
+            if self.x <= 20: self.x = 20
+
+        # Up Hallway
+        if self.y >= 470:
+            if self.y >= 645: self.y = 645
+            if self.x <= 485: self.x = 485
+            if self.x >= 745: self.x = 745
+        # Right Hallway
+        if self.x >= 745:
+            if self.y >= 470: self.y = 470
+            if self.x >= 1210: self.x = 1210
+        if self.x >= 695:
+            if self.y <= 330: self.y = 330
+            if self.x >= 1210: self.x = 1210
+
+        # Down Hallway
+        if self.y <= 330:
+            if self.y <= 50: self.y = 50
+            if self.x <= 535: self.x = 535
+            if self.x >= 695: self.x = 695
+        '''
+        if self.x <= 20: self.x = 20
+        if self.x >= 1210: self.x = 1210
+        if self.y <= 50: self.y = 50
+        if self.y >= 645: self.y = 645
+
+
 
     def handle_event(self, event):
         if event.type == SDL_KEYDOWN and event.key == SDLK_e:
@@ -135,6 +176,7 @@ class Reporter:
                     self.y_dir -= 1
                 elif event.key == SDLK_DOWN:
                     self.y_dir += 1
+
             if cur_xdir != self.x_dir or cur_ydir != self.y_dir:  # 방향키에 따른 변화가 있으면
                 if self.x_dir == 0 and self.y_dir == 0:  # 멈춤
                     self.state_machine.handle_state_event(('STOP', self.face_dir))  # 스탑 시 이전 방향 전달
@@ -148,11 +190,29 @@ class Reporter:
 
     def update(self):
         self.state_machine.update()
+        import play_mode
+        self.handle_collision()
 
     def draw(self):
         self.state_machine.draw()
+        self.font.draw(self.x - 60, self.y + 50, f'({self.x:.1f}, {self.y:.1f})', (255, 255, 0))
+        draw_rectangle(*self.get_bb())
+
+        if play_mode.background.floor == 1:
+            draw_rectangle(play_mode.background.floor_1_x1,
+                           play_mode.background.floor_1_y1,
+                           play_mode.background.floor_1_x2,
+                           play_mode.background.floor_1_y2)
+        elif play_mode.background.floor == 2:
+            draw_rectangle(play_mode.background.floor_2_x1,
+                           play_mode.background.floor_2_y1,
+                           play_mode.background.floor_2_x2,
+                           play_mode.background.floor_2_y2)
+
+
+        '''
         if self.flashlight == 1:
             self.image2.draw(self.x - 5, self.y + 35)
         elif self.flashlight == 0:
             self.image3.draw(self.x, self.y + 25)
-
+        '''
