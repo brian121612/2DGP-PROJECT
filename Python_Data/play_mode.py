@@ -32,10 +32,27 @@ class Background:
 
 
     def load_image(self):
-        if self.floor == 1:
+        global reporter
+
+        # 1. reporter가 None이면 기본 층 배경만 로드 (초기화 오류 방지)
+        if reporter is None:
+            if self.floor == 1:
+                self.image = load_image('FLOOR_1.png')
+            elif self.floor == 2:
+                self.image = load_image('FLOOR_2.png')
+            return
+
+        # 2. reporter가 생성되었다면, lab 상태를 최우선으로 체크하여 방 배경 로드
+        if reporter.lab == 11:
+            self.image = load_image('Lab_F1_1.png')
+        # 3. lab 상태가 아니면 층별 배경 로드
+        elif self.floor == 1:
             self.image = load_image('FLOOR_1.png')
         elif self.floor == 2:
             self.image = load_image('FLOOR_2.png')
+
+
+
 
     def draw(self):
         # 캔버스 중앙에 배경 이미지를 그립니다.
@@ -45,7 +62,7 @@ class Background:
 
     def update(self):
         # 배경은 움직이지 않으므로 update는 비워둡니다.
-        pass
+        self.load_image()
 
 reporter = None
 
@@ -64,8 +81,6 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE and reporter.main_door == 1:
             game_framework.change_mode(title_mode)
             return
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_i:
-            game_framework.push_mode(item_mode)
         else:
             reporter.handle_event(event)
 
@@ -76,8 +91,8 @@ def init():
     background = Background()
     game_world.add_object(background, 0)
 
-    #zombie = Zombie(300, 300)
-    #game_world.add_object(zombie, 1)
+    zombie = Zombie()
+    game_world.add_object(zombie, 1)
 
     reporter = Reporter()
     game_world.add_object(reporter, 2)

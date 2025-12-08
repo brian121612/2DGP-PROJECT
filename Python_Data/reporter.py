@@ -1,5 +1,5 @@
 from pico2d import *
-from sdl2 import SDL_KEYDOWN, SDLK_ESCAPE, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN, SDLK_e
+from sdl2 import SDL_KEYDOWN, SDLK_ESCAPE, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN, SDLK_e, SDLK_f
 
 import game_world
 import game_framework
@@ -109,6 +109,8 @@ class Reporter:
         self.enter_door = 0
         # 정문
         self.main_door = 0
+        # 연구실
+        self.lab = 0
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
@@ -128,38 +130,19 @@ class Reporter:
         # 이동 가능 영역 규칙 (FLOOR 1 기준)
         allowed = False
 
+        # 기본 벽 충돌
         if play_mode.background.floor == 1:
-            # 상단 복도
-            if 470 <= self.y <= 525 and 485 <= self.x <= 745:
-                allowed = True
-            # 상단 좌측 복도
-            if 525 <= self.y <= 645 and 485 <= self.x <= 600:
-                allowed = True
-            # 계단
-            if 525 <= self.y <= 645 and 655 <= self.x <= 745:
-                allowed = True
-            # 좌측 복도
-            elif 330 <= self.y <= 470 and 20 <= self.x <= 485:
-                allowed = True
-            # 우측 복도
-            elif 330 <= self.y <= 470 and 745 <= self.x <= 1210:
-                allowed = True
-            # 하단 복도
-            elif 50 <= self.y <= 330 and 535 <= self.x <= 695:
-                allowed = True
-            # 중앙 복도
-            elif 330 <= self.y <= 470 and 485 <= self.x <= 745:
-                allowed = True
+            if 470 <= self.y <= 525 and 485 <= self.x <= 745: allowed = True  # 상단 복도
+            if 525 <= self.y <= 645 and 485 <= self.x <= 600: allowed = True  # 상단 좌측 복도
+            if 525 <= self.y <= 645 and 655 <= self.x <= 745: allowed = True  # 계단
+            elif 330 <= self.y <= 470 and 20 <= self.x <= 485: allowed = True  # 좌측 복도
+            elif 330 <= self.y <= 470 and 745 <= self.x <= 1210: allowed = True  # 우측 복도
+            elif 50 <= self.y <= 330 and 535 <= self.x <= 695: allowed = True  # 하단 복도
+            elif 330 <= self.y <= 470 and 485 <= self.x <= 745: allowed = True  # 중앙 복도
         elif play_mode.background.floor == 2:
-            # 상단 복도
-            if 470 <= self.y <= 500 and 490 <= self.x <= 755:
-                allowed = True
-            # 계단
-            elif 500 <= self.y <= 645 and 490 <= self.x <= 590:
-                allowed = True
-            # 중앙 복도
-            elif 330 <= self.y <= 470 and 20 <= self.x <= 1210:
-                allowed = True
+            if 470 <= self.y <= 500 and 490 <= self.x <= 755: allowed = True  # 상단 복도
+            elif 500 <= self.y <= 645 and 490 <= self.x <= 590: allowed = True  # 계단
+            elif 330 <= self.y <= 470 and 20 <= self.x <= 1210: allowed = True  # 중앙 복도
 
         # 허용영역이 아니라면 → 이전 위치로 복귀
         if not allowed:
@@ -235,14 +218,34 @@ class Reporter:
                     play_mode.background.floor = 2
                     play_mode.background.load_image()
                     self.x, self.y = play_mode.background.start_pos_floor_2
+                    self.enter_door = 0
                 elif play_mode.background.floor == 2:
                     play_mode.background.floor = 1
                     play_mode.background.load_image()
                     self.x, self.y = play_mode.background.start_pos_floor_1
+                    self.enter_door = 0
                 return
 
+        # 정문
         if event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             return
+
+        # 연구실
+        if self.enter_door == 1:
+            if event.type == SDL_KEYDOWN and event.key == SDLK_f:
+                if play_mode.background.floor == 1:
+                    self.lab = 11
+                '''
+                elif self.enter_door == 2: self.lab = 12
+                elif self.enter_door == 3: self.lab = 13
+                elif self.enter_door == 4: self.lab = 14
+            elif play_mode.background.floor == 2:
+                if self.enter_door == 5: self.lab = 21
+                elif self.enter_door == 6: self.lab = 22
+                elif self.enter_door == 7: self.lab = 23
+                elif self.enter_door == 8: self.lab = 24
+                '''
+
 
         if event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN):
             cur_xdir, cur_ydir = self.x_dir, self.y_dir

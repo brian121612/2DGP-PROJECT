@@ -16,37 +16,37 @@ RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
 # zombie Action Speed
-TIME_PER_ACTION = 0.5
+TIME_PER_ACTION = 1.0
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-FRAMES_PER_ACTION = 10.0
+FRAMES_PER_ACTION = 8.0
 
 animation_names = ['Walk', 'Idle']
 
 
 class Zombie:
-    images = None
+    image = None
+    font = None
+    marker_image = None
 
     def load_images(self):
-        if Zombie.images == None:
-            Zombie.images = {}
-            for name in animation_names:
-                Zombie.images[name] = [load_image("./zombie/" + name + " (%d)" % i + ".png") for i in range(1, 11)]
+        if Zombie.image == None:
+            Zombie.image = load_image('Zombie_Sheet_3.png')
             Zombie.font = load_font('ENCR10B.TTF', 40)
-            Zombie.marker_image = load_image('hand_arrow.png')
 
 
     def __init__(self, x=None, y=None):
-        self.x = x if x else random.randint(100, 1180)
-        self.y = y if y else random.randint(100, 924)
+        self.x = x if x else random.randint(100, 500)
+        self.y = y if y else random.randint(100, 500)
         self.load_images()
         self.dir = 0.0      # radian 값으로 방향을 표시
         self.speed = 0.0
-        self.frame = random.randint(0, 9)
+        self.frame = random.randint(0, 7)
         self.state = 'Idle'
         self.ball_count = 0
 
+        self.last_dir = 1.0
 
-        self.tx, self.ty = 1000, 1000
+        self.tx, self.ty = 100, 100
         # 여기를 채우시오.
 
         self.build_behavior_tree()
@@ -61,27 +61,39 @@ class Zombie:
 
 
     def update(self):
-        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        if self.state == 'Walk':
+            self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8.0
         # fill here
         self.bt.run() # 매 프레임마다 행동트리를 root 부터 시작해서 실행함.
 
     def draw(self):
-        if math.cos(self.dir) < 0:
-            Zombie.images[self.state][int(self.frame)].composite_draw(0, 'h', self.x, self.y, 100, 100)
+        if self.state == 'Walk':
+            frame_index = int(self.frame)
+            current_direction = self.dir
+            flip = 'h' if math.cos(current_direction) < 0 else None
         else:
-            Zombie.images[self.state][int(self.frame)].draw(self.x, self.y, 100, 100)
-        self.font.draw(self.x - 10, self.y + 60, f'{self.ball_count}', (0, 0, 255))
-        Zombie.marker_image.draw(self.tx+25, self.ty-25)
+            frame_index = 0
+            current_direction = self.last_dir
+            flip = None
+
+        sx = frame_index * 150
+        sy = 0
+
+        if flip == 'h':
+            Zombie.image.clip_composite_draw(sx, sy, 139, 200, 0, 'h', self.x, self.y, 70, 100)
+        else:
+            Zombie.image.clip_draw(sx, sy, 139, 200, self.x, self.y, 70, 100)
+
+        Zombie.font.draw(self.x - 10, self.y + 60, f'{self.ball_count}', (0, 0, 255))
 
         draw_rectangle(*self.get_bb())
-        draw_circle(self.x, self.y, int(7.0 * PIXEL_PER_METER), 255,255,255)
+        draw_circle(self.x, self.y, int(7.0 * PIXEL_PER_METER), 255, 255, 255)
 
     def handle_event(self, event):
         pass
 
     def handle_collision(self, group, other):
-        if group == 'zombie:ball':
-            self.ball_count += 1
+        pass
 
 
     def set_target_location(self, x=None, y=None):
@@ -105,7 +117,13 @@ class Zombie:
     def move_little_to(self, tx, ty):
         # 여기를 채우시오.
         distance = RUN_SPEED_PPS * game_framework.frame_time
-        self.dir = math.atan2(ty-self.y, tx-self.x) # 각도 구하기
+
+        new_dir = math.atan2(ty - self.y, tx - self.x)
+
+        if self.state == 'Walk':
+            self.dir = new_dir
+            self.last_dir = self.dir
+
         self.x += distance * math.cos(self.dir)
         self.y += distance * math.sin(self.dir)
         pass
@@ -117,10 +135,14 @@ class Zombie:
         # frame_time 을 이용해서 이동거리 계싼.
         self.state = 'Walk' # 디버그 출력
         self.move_little_to(self.tx, self.ty) # 목표지로 조금 이동
+
         if self.distance_less_than(self.tx, self.ty, self.x, self.y, r):
+            self.state = 'Idle'
+            # 도착 순간 dir은 변경하지 않고 last_dir만 유지
+            self.dir = self.last_dir
             return BehaviorTree.SUCCESS
-        else:
-            return BehaviorTree.RUNNING
+
+        return BehaviorTree.RUNNING
 
 
 
@@ -133,18 +155,21 @@ class Zombie:
 
     def if_boy_nearby(self, distance):
         # 여기를 채우시오.
-        if self.distance_less_than(common.boy.x, common.boy.y, self.x, self.y, distance):
+        '''
+        if self.distance_less_than(common.reporter.x, common.reporter.y, self.x, self.y, distance):
             return BehaviorTree.SUCCESS
         else:
             return BehaviorTree.FAIL
+        '''
+        pass
 
 
 
     def move_to_boy(self, r=0.5):
         # 여기를 채우시오.
         self.state = 'Walk'
-        self.move_little_to(common.boy.x, common.boy.y)
-        if self.distance_less_than(common.boy.x, common.boy.y, self.x, self.y, r):
+        self.move_little_to(common.reporter.x, common.reporter.y)
+        if self.distance_less_than(common.reporter.x, common.reporter.y, self.x, self.y, r):
             return BehaviorTree.SUCCESS
         else:
             return BehaviorTree.RUNNING
@@ -159,7 +184,7 @@ class Zombie:
         pass
 
     def ball_count_compare(self):
-        if common.boy.ball_count > self.ball_count:
+        if common.reporter.ball_count > self.ball_count:
             return BehaviorTree.SUCCESS
         else:
             return BehaviorTree.RUNNING
