@@ -22,7 +22,7 @@ def event_run(e):
 
 # Reporter Run Speed
 PIXEL_PER_METER = (100.0 / 0.3)  # 10 pixel 30 cm
-RUN_SPEED_KMPH = 5.0  # Km / Hour
+RUN_SPEED_KMPH = 2.5  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
@@ -111,6 +111,8 @@ class Reporter:
         self.main_door = 0
         # 연구실
         self.lab = 0
+        self.lab_exit = 0
+        self.last_entered_door = 0
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
@@ -127,6 +129,9 @@ class Reporter:
 
 
     def handle_collision(self):
+        if self.lab != 0:
+            return
+
         # 이동 가능 영역 규칙 (FLOOR 1 기준)
         allowed = False
 
@@ -196,6 +201,23 @@ class Reporter:
                     return 8
         return 0
 
+    def exit_lab(self):
+        self.lab_exit = 0
+
+        # 1층 연구실 (Lab 11, 12, 13, 14)의 출구 범위
+        if 11 <= self.lab <= 14:
+            # 535 <= x <= 720 (X축) 및 0 <= y <= 40 (Y축)
+            if 535 <= self.x <= 720 and 0 <= self.y <= 80:
+                self.lab_exit = 1
+                return 1
+
+        # 2층 연구실 (Lab 21, 22, 23, 24)의 출구 범위
+        elif 21 <= self.lab <= 24:
+            # 535 <= x <= 730 (X축) 및 0 <= y <= 40 (Y축) (draw 함수 기준)
+            if 535 <= self.x <= 730 and 0 <= self.y <= 80:
+                self.lab_exit = 1
+                return 1
+
     def exit_main_door(self):
         self.main_door = 0
 
@@ -231,42 +253,85 @@ class Reporter:
             return
 
         # 연구실
-        if self.enter_door == 1:
-            if event.type == SDL_KEYDOWN and event.key == SDLK_f:
-                if play_mode.background.floor == 1:
+        if event.type == SDL_KEYDOWN and event.key == SDLK_f:
+            if self.lab == 0:  # lab 밖에서만 들어감
+                if self.enter_door == 1 and play_mode.background.floor == 1:
                     self.lab = 11
-                '''
-                elif self.enter_door == 2: self.lab = 12
-                elif self.enter_door == 3: self.lab = 13
-                elif self.enter_door == 4: self.lab = 14
-            elif play_mode.background.floor == 2:
-                if self.enter_door == 5: self.lab = 21
-                elif self.enter_door == 6: self.lab = 22
-                elif self.enter_door == 7: self.lab = 23
-                elif self.enter_door == 8: self.lab = 24
-                '''
+                    self.last_entered_door = 1
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 2 and play_mode.background.floor == 1:
+                    self.lab = 12
+                    self.last_entered_door = 2
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 3 and play_mode.background.floor == 1:
+                    self.lab = 13
+                    self.last_entered_door = 3
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 4 and play_mode.background.floor == 1:
+                    self.lab = 14
+                    self.last_entered_door = 4
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 5 and play_mode.background.floor == 2:
+                    self.lab = 21
+                    self.last_entered_door = 5
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 6 and play_mode.background.floor == 2:
+                    self.lab = 22
+                    self.last_entered_door = 6
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 7 and play_mode.background.floor == 2:
+                    self.lab = 23
+                    self.last_entered_door = 7
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+                elif self.enter_door == 8 and play_mode.background.floor == 2:
+                    self.lab = 24
+                    self.last_entered_door = 8
+                    play_mode.background.load_image()
+                    self.x, self.y = play_mode.background.start_pos_lab
+                    return
+
+        # 연구실 나가기 (출구 범위에서만 f로 나감)
+        if self.lab != 0 and self.lab_exit == 1 and event.type == SDL_KEYDOWN and event.key == SDLK_f:
+            self.lab = 0
+            play_mode.background.load_image()
+            if self.last_entered_door == 1: self.x, self.y = 137, 460
+            if self.last_entered_door == 2: self.x, self.y = 320, 460
+            if self.last_entered_door == 3: self.x, self.y = 920, 460
+            if self.last_entered_door == 4: self.x, self.y = 1095, 460
+
+            if self.last_entered_door == 5: self.x, self.y = 137, 460
+            if self.last_entered_door == 6: self.x, self.y = 320, 460
+            if self.last_entered_door == 7: self.x, self.y = 920, 460
+            if self.last_entered_door == 8: self.x, self.y = 1095, 460
+
 
 
         if event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN):
             cur_xdir, cur_ydir = self.x_dir, self.y_dir
             if event.type == SDL_KEYDOWN:
-                if event.key == SDLK_LEFT:
-                    self.x_dir -= 1
-                elif event.key == SDLK_RIGHT:
-                    self.x_dir += 1
-                elif event.key == SDLK_UP:
-                    self.y_dir += 1
-                elif event.key == SDLK_DOWN:
-                    self.y_dir -= 1
+                if event.key == SDLK_LEFT:self.x_dir -= 1
+                elif event.key == SDLK_RIGHT:self.x_dir += 1
+                elif event.key == SDLK_UP:self.y_dir += 1
+                elif event.key == SDLK_DOWN:self.y_dir -= 1
             elif event.type == SDL_KEYUP:
-                if event.key == SDLK_LEFT:
-                    self.x_dir += 1
-                elif event.key == SDLK_RIGHT:
-                    self.x_dir -= 1
-                elif event.key == SDLK_UP:
-                    self.y_dir -= 1
-                elif event.key == SDLK_DOWN:
-                    self.y_dir += 1
+                if event.key == SDLK_LEFT:self.x_dir += 1
+                elif event.key == SDLK_RIGHT:self.x_dir -= 1
+                elif event.key == SDLK_UP:self.y_dir -= 1
+                elif event.key == SDLK_DOWN:self.y_dir += 1
 
             if cur_xdir != self.x_dir or cur_ydir != self.y_dir:  # 방향키에 따른 변화가 있으면
                 if self.x_dir == 0 and self.y_dir == 0:  # 멈춤
@@ -287,63 +352,69 @@ class Reporter:
         self.on_stairs()
         self.enter_room()
         self.exit_main_door()
+        self.exit_lab()
 
     def draw(self):
         self.state_machine.draw()
         self.font.draw(self.x - 60, self.y + 50, f'({self.x:.1f}, {self.y:.1f})', (255, 255, 0))
         draw_rectangle(*self.get_bb())
-        
+
+
         # 계단 사각형 테두리 그리기
-        if play_mode.background.floor == 1:
-            draw_rectangle(play_mode.background.stair_1_x1,
-                           play_mode.background.stair_1_y1,
-                           play_mode.background.stair_1_x2,
-                           play_mode.background.stair_1_y2)
-        elif play_mode.background.floor == 2:
-            draw_rectangle(play_mode.background.stair_2_x1,
-                           play_mode.background.stair_2_y1,
-                           play_mode.background.stair_2_x2,
-                           play_mode.background.stair_2_y2)
-
-        if self.he_is == 1:
+        if self.lab == 0:
             if play_mode.background.floor == 1:
-                self.font.draw(600, 580, 'Press SPACE to go UP', (255, 255, 0))
-            if play_mode.background.floor == 2:
-                self.font.draw(420, 580, 'Press SPACE to go DOWN', (255, 255, 0))
+                draw_rectangle(play_mode.background.stair_1_x1,
+                               play_mode.background.stair_1_y1,
+                               play_mode.background.stair_1_x2,
+                               play_mode.background.stair_1_y2)
+            elif play_mode.background.floor == 2:
+                draw_rectangle(play_mode.background.stair_2_x1,
+                               play_mode.background.stair_2_y1,
+                               play_mode.background.stair_2_x2,
+                               play_mode.background.stair_2_y2)
 
-        # 문 enter 테두리
-        if play_mode.background.floor == 1:
-            draw_rectangle(90, 450, 185, 470)
-            draw_rectangle(265, 450, 360, 470)
-            draw_rectangle(875, 450, 965, 470)
-            draw_rectangle(1045, 450, 1140, 470)
-            if self.enter_door == 1:
-                self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
-            elif self.enter_door == 2:
-                self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
-            elif self.enter_door == 3:
-                self.font.draw(840, 500, 'Press f to enter', (255, 255, 0))
-            elif self.enter_door == 4:
-                self.font.draw(1010, 500, 'Press f to enter', (255, 255, 0))
-        elif play_mode.background.floor == 2:
-            draw_rectangle(90, 450, 185, 470)
-            draw_rectangle(265, 450, 360, 470)
-            draw_rectangle(885, 450, 970, 470)
-            draw_rectangle(1055, 450, 1145, 470)
-            if self.enter_door == 5:
-                self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
-            elif self.enter_door == 6:
-                self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
-            elif self.enter_door == 7:
-                self.font.draw(845, 500, 'Press f to enter', (255, 255, 0))
-            elif self.enter_door == 8:
-                self.font.draw(1015, 500, 'Press f to enter', (255, 255, 0))
+            if self.he_is == 1:
+                if play_mode.background.floor == 1:
+                    self.font.draw(600, 580, 'Press SPACE to go UP', (255, 255, 0))
+                if play_mode.background.floor == 2:
+                    self.font.draw(420, 580, 'Press SPACE to go DOWN', (255, 255, 0))
 
-        # 정문 테두리
-        if play_mode.background.floor == 1:
-            draw_rectangle(570, 20, 665, 160)
-            if self.main_door == 1:
-                self.font.draw(540, 140, 'Press ESC to exit', (0, 255, 0))
+            # 문 enter 테두리
+            if play_mode.background.floor == 1:
+                draw_rectangle(90, 450, 185, 470)
+                draw_rectangle(265, 450, 360, 470)
+                draw_rectangle(875, 450, 965, 470)
+                draw_rectangle(1045, 450, 1140, 470)
+                if self.enter_door == 1:self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
+                elif self.enter_door == 2:self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
+                elif self.enter_door == 3:self.font.draw(840, 500, 'Press f to enter', (255, 255, 0))
+                elif self.enter_door == 4:self.font.draw(1010, 500, 'Press f to enter', (255, 255, 0))
+            elif play_mode.background.floor == 2:
+                draw_rectangle(90, 450, 185, 470)
+                draw_rectangle(265, 450, 360, 470)
+                draw_rectangle(885, 450, 970, 470)
+                draw_rectangle(1055, 450, 1145, 470)
+                if self.enter_door == 5: self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
+                elif self.enter_door == 6:self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
+                elif self.enter_door == 7:self.font.draw(845, 500, 'Press f to enter', (255, 255, 0))
+                elif self.enter_door == 8:self.font.draw(1015, 500, 'Press f to enter', (255, 255, 0))
+
+            # 정문 테두리
+            if play_mode.background.floor == 1:
+                draw_rectangle(570, 20, 665, 160)
+                if self.main_door == 1:
+                    self.font.draw(540, 140, 'Press ESC to exit', (0, 255, 0))
+
+        else:
+            # 연구실 테두리
+            if self.lab_exit == 1: self.font.draw(550, 20, 'Press f to exit', (255, 255, 0))
+
+            if 11 <= self.lab <= 14:
+                draw_rectangle(535, 0, 720, 80)
+                draw_rectangle(305, 80, 975, 500)
+            if 21 <= self.lab <= 24:
+                draw_rectangle(535, 0, 730, 80)
+                draw_rectangle(285, 40, 1000, 500)
 
         '''
         if self.flashlight == 1:

@@ -1,7 +1,7 @@
 import game_framework
 from pico2d import *
 
-import title_mode, item_mode
+import title_mode
 from reporter import Reporter
 import game_world
 from zombie import Zombie
@@ -23,10 +23,14 @@ class Background:
         self.stair_2_x2 = 610
         self.stair_2_y2 = 695
 
+
+
         self.load_image()
 
         self.start_pos_floor_1 = (705, 560)
         self.start_pos_floor_2 = (540, 535)
+
+        self.start_pos_lab = (640, 30)
 
         self.canvas_width, self.canvas_height = 1280, 720
 
@@ -45,6 +49,20 @@ class Background:
         # 2. reporter가 생성되었다면, lab 상태를 최우선으로 체크하여 방 배경 로드
         if reporter.lab == 11:
             self.image = load_image('Lab_F1_1.png')
+        elif reporter.lab == 12:
+            self.image = load_image('Lab_F1_2.png')
+        elif reporter.lab == 13:
+            self.image = load_image('Lab_F1_3.png')
+        elif reporter.lab == 14:
+            self.image = load_image('Lab_F1_4.png')
+        elif reporter.lab == 21:
+            self.image = load_image('Lab_F2_1.png')
+        elif reporter.lab == 22:
+            self.image = load_image('Lab_F2_2.png')
+        elif reporter.lab == 23:
+            self.image = load_image('Lab_F2_3.png')
+        elif reporter.lab == 24:
+            self.image = load_image('Lab_F2_4.png')
         # 3. lab 상태가 아니면 층별 배경 로드
         elif self.floor == 1:
             self.image = load_image('FLOOR_1.png')
@@ -78,7 +96,7 @@ def handle_events():
     for event in event_list:
         if event.type == SDL_QUIT:
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE and reporter.main_door == 1:
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE and reporter.main_door == 1 and reporter.lab == 0:
             game_framework.change_mode(title_mode)
             return
         else:
