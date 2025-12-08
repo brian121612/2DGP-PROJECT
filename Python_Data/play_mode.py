@@ -6,6 +6,7 @@ from reporter import Reporter
 import game_world
 from zombie import Zombie
 import common
+import Safe_mode
 
 background = None
 
@@ -97,9 +98,10 @@ def handle_events():
     for event in event_list:
         if event.type == SDL_QUIT:
             game_framework.quit()
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE and reporter.main_door == 1 and reporter.lab == 0 and common.have_cure == 1:
+            game_framework.change_mode(Safe_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE and reporter.main_door == 1 and reporter.lab == 0:
             game_framework.change_mode(title_mode)
-            return
         else:
             reporter.handle_event(event)
 
@@ -116,6 +118,8 @@ def init():
     common.reporter = Reporter()
     reporter = common.reporter
     game_world.add_object(common.reporter, 2)
+
+    game_world.add_collision_pair(reporter, zombie, 'boy:zombie')
 
 
 

@@ -1,5 +1,7 @@
+import random
+
 from pico2d import *
-from sdl2 import SDL_KEYDOWN, SDLK_ESCAPE, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN, SDLK_e, SDLK_f
+from sdl2 import SDL_KEYDOWN, SDLK_ESCAPE, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN, SDLK_e, SDLK_f, SDLK_g
 
 import game_world
 import game_framework
@@ -84,12 +86,18 @@ class Run:
             self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 0, 50, 100, self.reporter.x,self.reporter.y)
 
 
+def handle_collision(group, other):
+    if group == 'boy:zombie':
+        import game_framework
+        game_framework.quit()
+
 
 class Reporter:
     def __init__(self):
         self.image = load_image('Player_Sheet.png')
         self.image2 = load_image('FlashLight_ON.png')
         self.image3 = load_image('FlashLight_OFF.png')
+        self.image4 = load_image('Cure.png')
 
         self.font = load_font('ENCR10B.TTF', 16)
 
@@ -114,6 +122,12 @@ class Reporter:
         self.lab_exit = 0
         self.last_entered_door = 0
 
+        # 백신
+        self.cure_lab_id = random.choice([11,12])
+                                          #12, 13, 14, 21, 22, 23, 24])
+        self.cure_x = random.randint(400, 900)
+        self.cure_y = random.randint(400, 450)
+
         self.bgm = load_music('2DGP_BGM.mp3')
         self.bgm.set_volume(64)
         self.bgm.repeat_play()
@@ -132,7 +146,9 @@ class Reporter:
         )
 
 
-    def handle_collision(self):
+    def handle_internal_collision(self):
+        self.handle_lab_collision()
+
         if self.lab != 0:
             return
 
@@ -156,6 +172,23 @@ class Reporter:
         # 허용영역이 아니라면 → 이전 위치로 복귀
         if not allowed:
             self.x, self.y = self.prev_x, self.prev_y
+
+    def handle_lab_collision(self):
+        if self.lab == 0:
+            return
+
+        allowed = False
+
+        if 11 <= self.lab <= 14:
+            if 30 <= self.y <= 80 and 550 <= self.x <= 700:allowed = True
+            elif 80 <= self.y <= 500 and 330 <= self.x <= 950:allowed = True
+        elif 21 <= self.lab <= 24:
+            if 30 <= self.y <= 80 and 550 <= self.x <= 700:allowed = True
+            elif 70 <= self.y <= 500 and 310 <= self.x <= 980:allowed = True
+
+        if not allowed:
+            self.x, self.y = self.prev_x, self.prev_y
+
 
     def on_stairs(self):
         if play_mode.background.floor == 1:
@@ -232,6 +265,11 @@ class Reporter:
 
 
     def handle_event(self, event):
+        # 백신
+        if event.type == SDL_KEYDOWN and event.key == SDLK_g:
+            common.have_cure = 1
+            return
+
         # FlashLight Toggle ON/OFF
         if event.type == SDL_KEYDOWN and event.key == SDLK_e:
             self.flashlight ^= 1
@@ -352,7 +390,8 @@ class Reporter:
         self.prev_x, self.prev_y = self.x, self.y
         self.state_machine.update()
         import play_mode
-        self.handle_collision()
+        self.handle_lab_collision()
+        self.handle_internal_collision()
         self.on_stairs()
         self.enter_room()
         self.exit_main_door()
@@ -360,12 +399,13 @@ class Reporter:
 
     def draw(self):
         self.state_machine.draw()
-        self.font.draw(self.x - 60, self.y + 50, f'({self.x:.1f}, {self.y:.1f})', (255, 255, 0))
-        draw_rectangle(*self.get_bb())
+        # self.font.draw(self.x - 60, self.y + 50, f'({self.x:.1f}, {self.y:.1f})', (255, 255, 0))
+        #draw_rectangle(*self.get_bb())
 
 
         # 계단 사각형 테두리 그리기
         if self.lab == 0:
+            '''
             if play_mode.background.floor == 1:
                 draw_rectangle(play_mode.background.stair_1_x1,
                                play_mode.background.stair_1_y1,
@@ -376,6 +416,7 @@ class Reporter:
                                play_mode.background.stair_2_y1,
                                play_mode.background.stair_2_x2,
                                play_mode.background.stair_2_y2)
+            '''
 
             if self.he_is == 1:
                 if play_mode.background.floor == 1:
@@ -385,19 +426,19 @@ class Reporter:
 
             # 문 enter 테두리
             if play_mode.background.floor == 1:
-                draw_rectangle(90, 450, 185, 470)
-                draw_rectangle(265, 450, 360, 470)
-                draw_rectangle(875, 450, 965, 470)
-                draw_rectangle(1045, 450, 1140, 470)
+                #draw_rectangle(90, 450, 185, 470)
+                #draw_rectangle(265, 450, 360, 470)
+                #draw_rectangle(875, 450, 965, 470)
+                #draw_rectangle(1045, 450, 1140, 470)
                 if self.enter_door == 1:self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
                 elif self.enter_door == 2:self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
                 elif self.enter_door == 3:self.font.draw(840, 500, 'Press f to enter', (255, 255, 0))
                 elif self.enter_door == 4:self.font.draw(1010, 500, 'Press f to enter', (255, 255, 0))
             elif play_mode.background.floor == 2:
-                draw_rectangle(90, 450, 185, 470)
-                draw_rectangle(265, 450, 360, 470)
-                draw_rectangle(885, 450, 970, 470)
-                draw_rectangle(1055, 450, 1145, 470)
+                #draw_rectangle(90, 450, 185, 470)
+                #draw_rectangle(265, 450, 360, 470)
+                #draw_rectangle(885, 450, 970, 470)
+                #draw_rectangle(1055, 450, 1145, 470)
                 if self.enter_door == 5: self.font.draw(60, 500, 'Press f to enter', (255, 255, 0))
                 elif self.enter_door == 6:self.font.draw(235, 500, 'Press f to enter', (255, 255, 0))
                 elif self.enter_door == 7:self.font.draw(845, 500, 'Press f to enter', (255, 255, 0))
@@ -405,24 +446,29 @@ class Reporter:
 
             # 정문 테두리
             if play_mode.background.floor == 1:
-                draw_rectangle(570, 20, 665, 160)
+                #draw_rectangle(570, 20, 665, 160)
                 if self.main_door == 1:
                     self.font.draw(540, 140, 'Press ESC to exit', (0, 255, 0))
-
         else:
             # 연구실 테두리
             if self.lab_exit == 1: self.font.draw(550, 20, 'Press f to exit', (255, 255, 0))
-
+            '''
             if 11 <= self.lab <= 14:
                 draw_rectangle(535, 0, 720, 80)
                 draw_rectangle(305, 80, 975, 500)
             if 21 <= self.lab <= 24:
                 draw_rectangle(535, 0, 730, 80)
                 draw_rectangle(285, 40, 1000, 500)
+            '''
 
-        '''
         if self.flashlight == 1:
             self.image2.draw(self.x - 5, self.y + 35)
         elif self.flashlight == 0:
             self.image3.draw(self.x, self.y + 25)
-        '''
+
+        if self.lab != 0 and self.lab == self.cure_lab_id:
+            if common.have_cure != 1:
+                self.image4.clip_draw(0, 0, 400, 400, self.cure_x, self.cure_y, 50, 50)
+                if self.cure_x - 50 <= self.x <= self.cure_x + 50 and self.cure_y - 50 <= self.y <= self.cure_y + 50:
+                    self.font.draw(self.cure_x - 80, self.cure_y + 20, 'Press g to grab', (255, 255, 0))
+

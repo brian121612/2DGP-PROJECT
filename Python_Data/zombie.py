@@ -6,11 +6,12 @@ import game_framework
 import game_world
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import common
+import Infected_mode
 
 
 # zombie Run Speed
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
-RUN_SPEED_KMPH = 5.0  # Km / Hour
+RUN_SPEED_KMPH = 3.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
@@ -84,29 +85,6 @@ class Zombie:
 
 
     def draw(self):
-        '''
-        import common
-        if common.reporter is None: return
-        if common.reporter.lab == 0: return
-
-
-        lab = common.reporter.lab
-        in_lab = False
-
-        # 1층 연구실 내부 영역 체크
-        if 11 <= lab <= 14:
-            if 305 <= self.x <= 975 and 80 <= self.y <= 500:
-                in_lab = True
-
-        # 2층 연구실 영역
-        elif 21 <= lab <= 24:
-            if 285 <= self.x <= 1000 and 40 <= self.y <= 500:
-                in_lab = True
-
-        if not in_lab:
-            return
-        '''
-
         if self.state == 'Walk':
             frame_index = int(self.frame)
             current_direction = self.dir
@@ -125,8 +103,8 @@ class Zombie:
             else:
                 Zombie.image.clip_draw(sx, sy, 139, 200, self.x, self.y, 70, 100)
 
-            draw_rectangle(*self.get_bb())
-            draw_circle(self.x, self.y, int(5.0 * PIXEL_PER_METER), 255, 255, 255)
+            #draw_rectangle(*self.get_bb())
+            #draw_circle(self.x, self.y, int(5.0 * PIXEL_PER_METER), 255, 255, 255)
 
     def handle_event(self, event):
         pass
@@ -195,40 +173,13 @@ class Zombie:
         # 도착 판정
         if dist < PIXEL_PER_METER * r:
             self.state = 'Idle'
+            game_framework.change_mode(Infected_mode)
             return BehaviorTree.SUCCESS
 
         return BehaviorTree.RUNNING
 
 
-    def get_patrol_location(self):
-        # 여기를 채우시오.
-        self.tx, self.ty = self.patrol_locations[self.loc_no]
-        self.loc_no = (self.loc_no + 1) % len(self.patrol_locations)
-        return BehaviorTree.SUCCESS
-        pass
-
-
     def build_behavior_tree(self):
-        '''
-        # wander
-        wander_action = Action('랜덤 위치 설정', self.set_random_location)
-        wander_move = Action('랜덤 이동', self.move_to, 0.5)
-        wander = Sequence('배회', wander_action, wander_move)
-
-        # chase
-        chase_move = Action('추적 이동', self.move_to_reporter)
-
-        # 🔥 핵심: Condition을 Selector와 연결
-        root = Selector('root',
-                        Sequence('추격 시퀀스',
-                                 Condition('근접?', self.if_reporter_nearby, 5),
-                                 chase_move
-                                 ),
-                        wander
-                        )
-
-        self.bt = BehaviorTree(root)
-        '''
         a1 = Action('Set target location', self.set_target_location, 500, 50)
         a2 = Action('Move to', self.move_to)
         root = move_to_target_location = Sequence('Move to target location', a1, a2)
