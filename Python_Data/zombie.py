@@ -173,15 +173,11 @@ class Zombie:
 
 
     def move_to(self, r=0.5):
-        # 여기를 채우시오.
-        # frame_time 을 이용해서 이동거리 계싼.
-        self.state = 'Walk' # 디버그 출력
-        self.move_little_to(self.tx, self.ty) # 목표지로 조금 이동
+        self.state = 'Walk'
+        self.move_little_to(self.tx, self.ty)
 
         if self.distance_less_than(self.tx, self.ty, self.x, self.y, r):
             self.state = 'Idle'
-            # 도착 순간 dir은 변경하지 않고 last_dir만 유지
-            self.dir = self.last_dir
             return BehaviorTree.SUCCESS
 
         return BehaviorTree.RUNNING
@@ -204,10 +200,9 @@ class Zombie:
         dy = self.y - common.reporter.y
         dist = math.sqrt(dx * dx + dy * dy)
 
-        if dist < distance:  # <-- px 기준으로 단순 판단
-            print("CHASE MODE ACTIVATED!")  # 디버그 표시
+        # trigger distance
+        if dist < distance * PIXEL_PER_METER:
             return BehaviorTree.SUCCESS
-
         return BehaviorTree.FAIL
 
 
@@ -216,26 +211,23 @@ class Zombie:
 
     def move_to_boy(self, r=0.5):
         import common
-        self.state = 'Walk'
 
         dx = common.reporter.x - self.x
         dy = common.reporter.y - self.y
         dist = math.sqrt(dx * dx + dy * dy)
 
-        if dist < r:
+        self.state = 'Walk'
+        self.dir = math.atan2(dy, dx)
+
+        step = RUN_SPEED_PPS * game_framework.frame_time
+        self.x += step * math.cos(self.dir)
+        self.y += step * math.sin(self.dir)
+
+        # 도착 판정
+        if dist < PIXEL_PER_METER * r:
             self.state = 'Idle'
             return BehaviorTree.SUCCESS
 
-        # 방향 업데이트
-        self.dir = math.atan2(dy, dx)
-        self.last_dir = self.dir
-
-        # 한 프레임 이동
-        distance = RUN_SPEED_PPS * game_framework.frame_time
-        self.x += distance * math.cos(self.dir)
-        self.y += distance * math.sin(self.dir)
-
-        print(f"MOVING: {self.x:.1f}, {self.y:.1f} -> Reporter {common.reporter.x:.1f}, {common.reporter.y:.1f}")
         return BehaviorTree.RUNNING
 
 
@@ -246,28 +238,24 @@ class Zombie:
         return BehaviorTree.SUCCESS
         pass
 
-    def ball_count_compare(self):
-        if common.reporter.ball_count > self.ball_count:
-            return BehaviorTree.SUCCESS
-        else:
-            return BehaviorTree.RUNNING
-        pass
-
-    def avoid_boy(self, r=0.5):
-        self.move_to()
-        pass
-
-
-
 
     def build_behavior_tree(self):
-        c1 = Condition('소년 근접?', self.if_boy_nearby, 500)  # << 크게 준다 (px로 생각)
-        a4 = Action('추적', self.move_to_boy)
+        # 배회 설정
+        wander_action = Action('랜덤 위치 설정', self.set_random_location)
+        wander_move = Action('랜덤 이동', self.move_to, 0.5)
+        wander = Sequence('배회', wander_action, wander_move)
 
-        # 가까우면 추적, 아니면 그냥 이동
-        chase = Sequence('추적 시퀀스', c1, a4)
+        # 추격 트리거
+        chase_trigger = Condition('추격 트리거', self.if_boy_nearby, 5)
 
-        self.bt = BehaviorTree(chase)
+        # 추격 이동
+        chase_move = Action('추격 이동', self.move_to_boy)
+
+        # chase는 trigger → move만
+        chase = Sequence('추격', chase_trigger, chase_move)
+
+        # root: chase > wander fallback
+        self.bt = BehaviorTree(Selector('root', chase, wander))
 
 
 

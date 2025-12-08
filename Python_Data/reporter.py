@@ -114,6 +114,10 @@ class Reporter:
         self.lab_exit = 0
         self.last_entered_door = 0
 
+        self.bgm = load_music('2DGP_BGM.mp3')
+        self.bgm.set_volume(64)
+        self.bgm.repeat_play()
+
         self.IDLE = Idle(self)
         self.RUN = Run(self)
         self.state_machine = StateMachine(
