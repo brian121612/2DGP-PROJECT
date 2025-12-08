@@ -57,7 +57,7 @@ class Zombie:
 
 
     def get_bb(self):
-        return self.x - 50, self.y - 50, self.x + 50, self.y + 50
+        return self.x - 30, self.y - 50, self.x + 30, self.y + 50
 
 
     def update(self):
@@ -70,11 +70,11 @@ class Zombie:
         if common.reporter is not None:
             if common.reporter.lab != self.last_lab and common.reporter.lab != 0:
                 if 11 <= common.reporter.lab <= 14:
-                    self.x = random.randint(350, 900)
-                    self.y = random.randint(200, 400)
+                    self.x = random.randint(370, 930)
+                    self.y = random.randint(350, 500)
                 elif 21 <= common.reporter.lab <= 24:
-                    self.x = random.randint(350, 900)
-                    self.y = random.randint(200, 400)
+                    self.x = random.randint(370, 930)
+                    self.y = random.randint(350, 500)
                 self.last_lab = common.reporter.lab
 
             if common.reporter.lab != 0: self.bt.run()
