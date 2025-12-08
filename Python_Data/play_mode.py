@@ -5,6 +5,7 @@ import title_mode
 from reporter import Reporter
 import game_world
 from zombie import Zombie
+import common
 
 background = None
 
@@ -112,8 +113,9 @@ def init():
     zombie = Zombie()
     game_world.add_object(zombie, 1)
 
-    reporter = Reporter()
-    game_world.add_object(reporter, 2)
+    common.reporter = Reporter()
+    reporter = common.reporter
+    game_world.add_object(common.reporter, 2)
 
 
 
