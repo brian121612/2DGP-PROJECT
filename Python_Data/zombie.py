@@ -170,6 +170,10 @@ class Zombie:
         self.x += step * math.cos(self.dir)
         self.y += step * math.sin(self.dir)
 
+        self.Zsound = load_wav('zombie.wav')
+        self.Zsound.set_volume(16)
+        self.Zsound.play(1)
+
         # 도착 판정
         if dist < PIXEL_PER_METER * r:
             self.state = 'Idle'
