@@ -123,8 +123,7 @@ class Reporter:
         self.last_entered_door = 0
 
         # 백신
-        self.cure_lab_id = random.choice([11,12])
-                                          #12, 13, 14, 21, 22, 23, 24])
+        self.cure_lab_id = random.choice([11, 12, 13, 14, 21, 22, 23, 24])
         self.cure_x = random.randint(400, 900)
         self.cure_y = random.randint(400, 450)
 
