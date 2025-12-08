@@ -2,10 +2,10 @@ from pico2d import load_image
 
 class Pannel:
     def __init__(self):
-        self.image = load_image('item_select.png')
+        self.image = load_image('manual.png')
 
     def draw(self):
-        self.image.draw(400, 300)
+        self.image.draw(1280//2, 720//2)
 
     def update(self):
         pass
