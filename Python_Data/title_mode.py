@@ -15,7 +15,7 @@ def resume():
 
 def init():
     global image
-    image = load_image('Building_Outside.png')
+    image = load_image('Building_Outside_1.png')
 
 
 def finish():
@@ -23,9 +23,12 @@ def finish():
     del image
     pass
 
+def keybind_draw():
+    draw_rectangle(100,100,200,200)
+
 
 def update():
-    pass
+    keybind_draw()
 
 
 def draw():

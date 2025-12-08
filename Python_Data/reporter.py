@@ -1,10 +1,11 @@
 from pico2d import *
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN, SDLK_e
+from sdl2 import SDL_KEYDOWN, SDLK_ESCAPE, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN, SDLK_e
 
 import game_world
 import game_framework
 from state_machine import StateMachine
 import play_mode
+import common
 
 
 def space_down(e): # e is space down ?
@@ -81,6 +82,7 @@ class Run:
             self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 100, 50, 100, self.reporter.x, self.reporter.y)
         elif self.reporter.x_dir == -1:
             self.reporter.image.clip_draw(int(self.reporter.frame) * 75, 0, 50, 100, self.reporter.x,self.reporter.y)
+
 
 
 class Reporter:
@@ -225,6 +227,7 @@ class Reporter:
         if event.type == SDL_KEYDOWN and event.key == SDLK_e:
             self.flashlight ^= 1
             return
+
         # 계단 1층 <-> 2층
         if self.he_is == 1:
             if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
@@ -237,6 +240,9 @@ class Reporter:
                     play_mode.background.load_image()
                     self.x, self.y = play_mode.background.start_pos_floor_1
                 return
+
+        if event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+            return
 
         if event.key in (SDLK_LEFT, SDLK_RIGHT, SDLK_UP, SDLK_DOWN):
             cur_xdir, cur_ydir = self.x_dir, self.y_dir

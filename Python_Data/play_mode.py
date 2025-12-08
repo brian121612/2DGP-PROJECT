@@ -4,6 +4,7 @@ from pico2d import *
 import title_mode, item_mode
 from reporter import Reporter
 import game_world
+from zombie import Zombie
 
 background = None
 
@@ -60,8 +61,9 @@ def handle_events():
     for event in event_list:
         if event.type == SDL_QUIT:
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE and reporter.main_door == 1:
             game_framework.change_mode(title_mode)
+            return
         elif event.type == SDL_KEYDOWN and event.key == SDLK_i:
             game_framework.push_mode(item_mode)
         else:
@@ -74,8 +76,11 @@ def init():
     background = Background()
     game_world.add_object(background, 0)
 
+    #zombie = Zombie(300, 300)
+    #game_world.add_object(zombie, 1)
+
     reporter = Reporter()
-    game_world.add_object(reporter, 1)
+    game_world.add_object(reporter, 2)
 
 
 
