@@ -7,6 +7,7 @@ import game_world
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import common
 import Infected_mode
+import reporter
 
 
 # zombie Run Speed
@@ -170,9 +171,11 @@ class Zombie:
         self.x += step * math.cos(self.dir)
         self.y += step * math.sin(self.dir)
 
-        self.Zsound = load_wav('zombie.wav')
-        self.Zsound.set_volume(16)
-        self.Zsound.play(1)
+        #import reporter
+        #if reporter.lab != 0:
+            #self.Zsound = load_wav('zombie.wav')
+            #self.Zsound.set_volume(16)
+            #self.Zsound.play(1)
 
         # 도착 판정
         if dist < PIXEL_PER_METER * r:
